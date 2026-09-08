@@ -1,0 +1,75 @@
+<header class="navbar-header">
+  <div class="navbar-container">
+    <a routerLink="/home" class="brand-logo">
+      <svg class="book-icon" width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M13.5 3.325C11.66 1.77 9.25 0.85 6.5 0.85C3.75 0.85 1.34 1.77 0 3.325V19.825C1.34 18.27 3.75 17.35 6.5 17.35C9.25 17.35 11.66 18.27 13.5 19.825V3.325ZM16.5 3.325C18.34 1.77 20.75 0.85 23.5 0.85C26.25 0.85 28.66 1.77 30 3.325V19.825C28.66 18.27 26.25 17.35 23.5 17.35C20.75 17.35 18.34 18.27 16.5 19.825V3.325Z" fill="white"/>
+      </svg>
+      <span class="brand-name">Bookstore</span>
+    </a>
+
+
+    <div class="search-box">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9D9D9D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+        placeholder="Search ..."
+        class="search-input"
+      />
+    </div>
+    <div class="nav-actions">
+      <div class="user-menu-wrapper">
+        <div class="nav-item user-item" (click)="toggleUserMenu()">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="nav-label">{{ userDisplayName }}</span>
+        </div>
+
+        <div class="user-dropdown" *ngIf="showDropdown && isLoggedIn">
+          <div class="dropdown-header">
+            <span class="greeting">Hello,</span>
+            <span class="user-fullname">{{ userDisplayName }}</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item logout-btn" (click)="logout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="nav-item wishlist-item" (click)="goToWishlist()">
+        <div class="wishlist-icon-wrapper">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span *ngIf="wishlistCount > 0" class="wishlist-badge">{{ wishlistCount }}</span>
+        </div>
+        <span class="nav-label">Wishlist</span>
+      </div>
+
+      <div class="nav-item cart-item">
+        <div class="cart-icon-wrapper">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span *ngIf="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
+        </div>
+        <span class="nav-label">Cart</span>
+      </div>
+    </div>
+  </div>
+</header>
+

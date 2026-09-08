@@ -1,0 +1,496 @@
+:host {
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0A0A0A;
+  background-color: #ffffff;
+}
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 16px 0 40px 0;
+  background-color: #ffffff;
+}
+
+.content-container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #878787;
+  margin-bottom: 20px;
+}
+
+.breadcrumb-link {
+  color: #878787;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #a03037;
+}
+
+.breadcrumb-separator {
+  color: #b0b0b0;
+}
+
+.breadcrumb-current {
+  color: #0a0a0a;
+  font-weight: 500;
+}
+
+/* Details Grid Layout - Compact Adobe XD Specs */
+.details-grid {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+/* Left Column - Media & Action Buttons */
+.left-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.media-container {
+  display: flex;
+  gap: 12px;
+}
+
+/* Thumbnails */
+.thumbnails-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thumbnail-item {
+  width: 38px;
+  height: 48px;
+  border: 1px solid #dcdcdc;
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f9f9f9;
+  transition: border-color 0.2s ease;
+}
+
+.thumbnail-item:hover,
+.thumbnail-item.active {
+  border-color: #a03037;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Main Image Card */
+.main-image-card {
+  flex: 1;
+  height: 290px;
+  border: 1px solid #dcdcdc;
+  border-radius: 2px;
+  padding: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-image {
+  max-width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+}
+
+/* Action Buttons Row */
+.action-buttons-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-add-bag {
+  flex: 1;
+  height: 38px;
+  background-color: #a03037;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-bag:hover {
+  background-color: #89282e;
+}
+
+/* Quantity Stepper Control [ - ] [ 1 ] [ + ] */
+.cart-stepper-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.btn-stepper {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #dbdbdb;
+  background-color: #fafafa;
+  color: #333333;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  line-height: 1;
+}
+
+.btn-stepper:hover {
+  background-color: #f0f0f0;
+  border-color: #b0b0b0;
+}
+
+.stepper-count {
+  width: 44px;
+  height: 32px;
+  border: 1px solid #dbdbdb;
+  background-color: #ffffff;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.btn-wishlist {
+  flex: 1;
+  height: 38px;
+  background-color: #333333;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-wishlist:hover {
+  background-color: #1a1a1a;
+}
+
+.heart-icon {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+/* Right Section - Info & Details */
+.right-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.book-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.book-author {
+  font-size: 12px;
+  color: #878787;
+  margin: 0 0 12px 0;
+}
+
+/* Rating Row */
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.rating-badge {
+  background-color: #388e3c;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rating-count {
+  font-size: 12px;
+  color: #878787;
+  font-weight: 500;
+}
+
+/* Pricing Row */
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.price-current {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+
+.price-original {
+  font-size: 12px;
+  color: #878787;
+  text-decoration: line-through;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 14px 0;
+}
+
+/* Book Details Section */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #878787;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bullet-dot {
+  font-size: 14px;
+  line-height: 1;
+  color: #878787;
+}
+
+.detail-description {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #666666;
+  margin: 0;
+  max-width: 520px;
+}
+
+/* Customer Feedback Section */
+.feedback-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.feedback-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0;
+}
+
+/* Feedback Card / Form */
+.review-box-card {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.rating-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #666666;
+  margin: 0;
+}
+
+.star-rating-selector {
+  display: flex;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.star-item {
+  font-size: 16px;
+  color: #cccccc;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+
+.star-item.active {
+  color: #ffb400;
+}
+
+.review-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  height: 60px;
+  padding: 8px 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #333333;
+  outline: none;
+  resize: none;
+  background: #ffffff;
+}
+
+.review-textarea:focus {
+  border-color: #337ab7;
+}
+
+.review-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-submit-review {
+  background-color: #337ab7;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  padding: 5px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  height: 30px;
+  cursor: pointer;
+}
+
+.btn-submit-review:hover {
+  background-color: #286090;
+}
+
+/* Reviews List */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  max-width: 520px;
+}
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.review-card:last-child {
+  border-bottom: none;
+}
+
+.review-user-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #666666;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.review-stars-display {
+  display: flex;
+  gap: 2px;
+}
+
+.star-icon-small {
+  font-size: 12px;
+  color: #e0e0e0;
+}
+
+.star-icon-small.filled {
+  color: #ffb400;
+}
+
+.review-comment-text {
+  font-size: 11.5px;
+  color: #666666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .left-section {
+    max-width: 340px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

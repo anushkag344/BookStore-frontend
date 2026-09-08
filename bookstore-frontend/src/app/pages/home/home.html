@@ -1,0 +1,87 @@
+<div class="page-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <div class="books-header">
+        <div class="books-title-group">
+          <h1 class="books-title">Books</h1>
+          <span class="books-count">({{ displayedBooks.length }} items)</span>
+        </div>
+
+        <div class="sort-dropdown-group">
+          <select
+            class="sort-select"
+            [value]="selectedSort"
+            (change)="onSortChange($event)">
+            <option *ngFor="let option of sortOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="books-content-area">
+
+        <div class="loading-spinner" *ngIf="bookService.isLoading()">
+          <div class="spinner"></div>
+          <p>Loading catalog books...</p>
+        </div>
+
+        <div class="books-grid" *ngIf="!bookService.isLoading() && displayedBooks.length > 0">
+          <div class="book-card" *ngFor="let book of displayedBooks" (click)="openBookDetails(book.id)">
+            <div class="book-image-wrapper">
+              <img
+                [src]="book.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c'"
+                [alt]="book.bookName"
+                class="book-image"
+              />
+              <div class="out-of-stock-overlay" *ngIf="book.quantity <= 0">
+                OUT OF STOCK
+              </div>
+            </div>
+
+            <div class="book-details">
+              <h3 class="book-name" [title]="book.bookName">{{ book.bookName }}</h3>
+              <p class="book-author">by {{ getAuthorName(book) }}</p>
+
+              <div class="rating-badge">
+                <span class="rating-star">{{ book.rating || 4.5 }} &#9733;</span>
+                <span class="rating-count">({{ book.quantity != null ? book.quantity : 0 }})</span>
+              </div>
+
+              <div class="price-row">
+                <span class="price-current">Rs. {{ book.discountPrice && book.discountPrice > 0 ? book.discountPrice : book.price }}</span>
+                <span class="price-original" *ngIf="book.discountPrice && book.discountPrice > 0 && book.discountPrice < book.price">
+                  Rs. {{ book.price }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-books-card" *ngIf="!bookService.isLoading() && displayedBooks.length === 0">
+          <div class="empty-icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#A03037" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <ng-container *ngIf="bookService.searchQuery(); else noBooksInCatalog">
+            <h3>No Books Found</h3>
+            <p>No books match your search for "{{ bookService.searchQuery() }}". Try searching for another title or author.</p>
+          </ng-container>
+          <ng-template #noBooksInCatalog>
+            <h3>No Books Available</h3>
+            <p>Books added by the Admin will appear here in this catalog.</p>
+          </ng-template>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

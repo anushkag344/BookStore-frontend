@@ -1,0 +1,160 @@
+<div class="page-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <div class="breadcrumb-container">
+        <a routerLink="/home" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">
+          Book({{ getFormattedBookId() }})
+        </span>
+      </div>
+
+      <div class="details-grid" *ngIf="book">
+
+
+        <div class="left-section">
+          <div class="media-container">
+
+            <div class="thumbnails-list">
+              <div
+                class="thumbnail-item"
+                *ngFor="let thumb of thumbnails"
+                [class.active]="selectedImage === thumb"
+                (click)="selectThumbnail(thumb)">
+                <img [src]="thumb" [alt]="book.bookName" />
+              </div>
+            </div>
+
+            <div class="main-image-card">
+              <img [src]="selectedImage" [alt]="book.bookName" class="main-image" />
+            </div>
+          </div>
+
+
+          <div class="action-buttons-row">
+
+            <button
+              *ngIf="cartQuantity === 0"
+              class="btn-add-bag"
+              (click)="addToBag()">
+              ADD TO BAG
+            </button>
+
+            <div *ngIf="cartQuantity > 0" class="cart-stepper-container">
+              <button type="button" class="btn-stepper btn-minus" (click)="decreaseQuantity()">-</button>
+              <span class="stepper-count">{{ cartQuantity }}</span>
+              <button type="button" class="btn-stepper btn-plus" (click)="increaseQuantity()">+</button>
+            </div>
+
+
+            <button
+              class="btn-wishlist"
+              [class.wishlisted]="isWishlisted"
+              (click)="toggleWishlist()">
+              <span class="heart-icon">&#9829;</span>
+              {{ isWishlisted ? 'WISHLISTED' : 'WISHLIST' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="right-section">
+
+          <h1 class="book-title">{{ book.bookName }}</h1>
+          <p class="book-author">by {{ getAuthorName(book) }}</p>
+
+
+          <div class="rating-row">
+            <div class="rating-badge">
+              <span class="star-icon">{{ book.rating || 4.5 }} &#9733;</span>
+            </div>
+            <span class="rating-count">({{ book.quantity != null ? book.quantity : 20 }})</span>
+          </div>
+
+          <div class="price-row">
+            <span class="price-current">
+              Rs. {{ book.discountPrice && book.discountPrice > 0 ? book.discountPrice : book.price }}
+            </span>
+            <span
+              class="price-original"
+              *ngIf="book.discountPrice && book.discountPrice > 0 && book.discountPrice < book.price">
+              Rs. {{ book.price }}
+            </span>
+          </div>
+
+          <hr class="section-divider" />
+
+
+          <div class="detail-section">
+            <h3 class="detail-title">
+              <span class="bullet-dot">&#8226;</span> Book Detail
+            </h3>
+            <p class="detail-description">
+              {{ book.description || 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.' }}
+            </p>
+          </div>
+
+          <hr class="section-divider" />
+
+
+          <div class="feedback-section">
+            <h3 class="feedback-heading">Customer Feedback</h3>
+
+            <div class="review-box-card">
+              <p class="rating-label">Overall rating</p>
+
+              <div class="star-rating-selector" (mouseleave)="resetHoverRating()">
+                <span
+                  *ngFor="let s of [1, 2, 3, 4, 5]"
+                  class="star-item"
+                  [class.active]="s <= (hoverRating || userRating)"
+                  (mouseenter)="setHoverRating(s)"
+                  (click)="setRating(s)">
+                  &#9733;
+                </span>
+              </div>
+
+              <textarea
+                class="review-textarea"
+                rows="3"
+                placeholder="Write your review"
+                [(ngModel)]="reviewText"></textarea>
+
+              <div class="review-submit-row">
+                <button class="btn-submit-review" (click)="submitReview()">
+                  Submit
+                </button>
+              </div>
+            </div>
+
+
+            <div class="reviews-list">
+              <div class="review-card" *ngFor="let rev of reviews">
+                <div class="review-user-header">
+                  <div class="user-avatar">{{ rev.avatar }}</div>
+                  <span class="user-name">{{ rev.name }}</span>
+                </div>
+                <div class="review-stars-display">
+                  <span
+                    *ngFor="let s of [1, 2, 3, 4, 5]"
+                    class="star-icon-small"
+                    [class.filled]="s <= rev.rating">
+                    &#9733;
+                  </span>
+                </div>
+                <p class="review-comment-text">{{ rev.comment }}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>
