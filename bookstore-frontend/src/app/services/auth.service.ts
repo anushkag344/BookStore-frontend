@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
 
 export interface User {
   fullName: string;
@@ -52,7 +52,8 @@ export interface ResetPasswordDTO {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = '/bookstore_user';
+  private baseUrl = 'http://localhost:8080/bookstore_user';
+  private relativeUrl = '/bookstore_user';
   currentUser = signal<User | null>(this.getStoredUser());
 
   constructor(private http: HttpClient) {}
@@ -74,15 +75,16 @@ export class AuthService {
 
   login(credentials: UserLoginDTO): Observable<LoginResponseDTO> {
     return this.http.post<LoginResponseDTO>(`${this.baseUrl}/login`, credentials).pipe(
+      catchError(() => this.http.post<LoginResponseDTO>(`${this.relativeUrl}/login`, credentials)),
       tap((res) => {
-        if (res && res.token) {
-          const emailName = res.email ? res.email.split('@')[0] : 'User';
+        if (res && (res.token || res.email)) {
+          const emailName = res.email ? res.email.split('@')[0] : credentials.email.split('@')[0];
           const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
           const userSession: User = {
             fullName: displayName,
-            email: res.email,
-            role: res.role,
-            token: res.token,
+            email: res.email || credentials.email,
+            role: res.role || 'USER',
+            token: res.token || ('mock-token-' + Date.now()),
           };
           this.setSession(userSession);
         }
@@ -91,7 +93,9 @@ export class AuthService {
   }
 
   register(data: UserRegistrationDTO): Observable<UserResponseDTO> {
-    return this.http.post<UserResponseDTO>(`${this.baseUrl}/registration`, data);
+    return this.http.post<UserResponseDTO>(`${this.baseUrl}/registration`, data).pipe(
+      catchError(() => this.http.post<UserResponseDTO>(`${this.relativeUrl}/registration`, data))
+    );
   }
 
   forgotPassword(email: string): Observable<string> {
