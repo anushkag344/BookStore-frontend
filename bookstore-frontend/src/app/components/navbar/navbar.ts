@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { BookService } from '../../services/book.service';
 import { CartService } from '../../services/cart.service';
-
 import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
@@ -24,8 +23,16 @@ export class Navbar {
     public bookService: BookService,
     public cartService: CartService,
     public wishlistService: WishlistService,
-    private router: Router
+    private router: Router,
+    private elementRef: ElementRef
   ) {}
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.showDropdown = false;
+    }
+  }
 
   get cartCount(): number {
     return this.cartService.totalCount();
@@ -35,12 +42,8 @@ export class Navbar {
     return this.wishlistService.totalCount();
   }
 
-  goToWishlist(): void {
-    this.router.navigate(['/wishlist']);
-  }
-
   get userDisplayName(): string {
-    return this.authService.getUserName();
+    return this.isLoggedIn ? this.authService.getUserName() : 'Profile';
   }
 
   get isLoggedIn(): boolean {
@@ -51,12 +54,34 @@ export class Navbar {
     this.bookService.setSearchQuery(this.searchQuery);
   }
 
-  toggleUserMenu() {
-    if (!this.isLoggedIn) {
-      this.router.navigate(['/login']);
-    } else {
-      this.showDropdown = !this.showDropdown;
+  toggleUserMenu(event?: Event) {
+    if (event) {
+      event.stopPropagation();
     }
+    this.showDropdown = !this.showDropdown;
+  }
+
+  goToLogin(): void {
+    this.showDropdown = false;
+    this.router.navigate(['/login']);
+  }
+
+  goToProfile(): void {
+    this.showDropdown = false;
+  }
+
+  goToOrders(): void {
+    this.showDropdown = false;
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+    } else {
+      this.router.navigate(['/cart']);
+    }
+  }
+
+  goToWishlist(): void {
+    this.showDropdown = false;
+    this.router.navigate(['/wishlist']);
   }
 
   logout() {
@@ -65,5 +90,7 @@ export class Navbar {
     this.router.navigate(['/login']);
   }
 }
+
+
 
 

@@ -1,0 +1,126 @@
+.page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  padding: 40px 0 60px;
+}
+
+.content-container {
+  max-width: 850px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.success-card {
+  background: #ffffff;
+  border: 1px solid #E4E4E4;
+  border-radius: 4px;
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.celebration-graphics {
+  margin-bottom: 24px;
+}
+
+.badge-icon {
+  width: 90px;
+  height: 90px;
+  background-color: #3371B5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(51, 113, 181, 0.3);
+}
+
+.success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0A0102;
+  margin: 0 0 12px 0;
+}
+
+.order-id-text {
+  font-size: 15px;
+  color: #333333;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 480px;
+}
+
+.order-id-text strong {
+  color: #A03037;
+  font-weight: 700;
+}
+
+.details-table-wrapper {
+  width: 100%;
+  margin-bottom: 36px;
+  overflow-x: auto;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #DCDCDC;
+}
+
+.info-table th {
+  background-color: #FAFAFA;
+  border-bottom: 1px solid #DCDCDC;
+  border-right: 1px solid #DCDCDC;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0A0102;
+  text-align: center;
+}
+
+.info-table th:last-child {
+  border-right: none;
+}
+
+.info-table td {
+  border-right: 1px solid #DCDCDC;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #555555;
+  text-align: center;
+}
+
+.info-table td:last-child {
+  border-right: none;
+}
+
+.action-row {
+  margin-top: 10px;
+}
+
+.btn-continue {
+  background-color: #3371B5;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 12px 36px;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+}
+
+.btn-continue:hover {
+  background-color: #265993;
+  box-shadow: 0 4px 10px rgba(51, 113, 181, 0.3);
+}

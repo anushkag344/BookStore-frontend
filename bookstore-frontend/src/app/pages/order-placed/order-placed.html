@@ -1,0 +1,51 @@
+<div class="page-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <div class="success-card">
+        <div class="celebration-graphics">
+          <div class="badge-icon">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <h1 class="success-title">Order Placed Successfully!</h1>
+        <p class="order-id-text">
+          hurray!!! your order is confirmed <br>
+          the order id is <strong>#{{ orderId }}</strong> save the order id for further communication.
+        </p>
+
+        <!-- Customer Support Details Table -->
+        <div class="details-table-wrapper">
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>Email Us</th>
+                <th>Contact Number</th>
+                <th>Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>admin&#64;bookstore.com</td>
+                <td>+91 8163475881</td>
+                <td>42, Green Avenue, Tech Park Road, Sector 4, Bengaluru, Karnataka 560100</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="action-row">
+          <a routerLink="/home" class="btn-continue">CONTINUE SHOPPING</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

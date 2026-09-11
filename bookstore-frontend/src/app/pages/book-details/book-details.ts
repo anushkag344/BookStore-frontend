@@ -56,36 +56,43 @@ export class BookDetails implements OnInit {
   }
 
   loadBookData(): void {
+    if (this.bookId) {
+      this.bookService.fetchBookByIdBackend(this.bookId).subscribe((b) => {
+        if (b) {
+          this.book = b;
+          this.setupImages(b);
+        }
+      });
+    }
+
     const found = this.bookService.getBookById(this.bookId);
     if (found) {
       this.book = found;
       this.setupImages(found);
     } else {
-      // Fallback or retry after load
       setTimeout(() => {
         const retryFound = this.bookService.getBookById(this.bookId);
         if (retryFound) {
           this.book = retryFound;
           this.setupImages(retryFound);
         } else {
-          // Default mock book if id not matched
-          this.book = {
+          const firstBook = this.bookService.books()[0];
+          this.book = firstBook || {
             id: this.bookId || 1,
-            bookName: "Don't Make Me Think",
-            author: 'Steve Krug',
-            authorName: 'Steve Krug',
-            description:
-              'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut',
-            price: 2000,
-            discountPrice: 1500,
+            bookName: "Think Positive",
+            author: 'James Thomas',
+            authorName: 'James Thomas',
+            description: 'A inspiring book on positive thinking and mindset by James Thomas.',
+            price: 1000,
+            discountPrice: 600,
             quantity: 20,
             image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c',
             rating: 4.5,
-            ratingCount: 20,
+            ratingCount: 10,
           };
           this.setupImages(this.book);
         }
-      }, 500);
+      }, 300);
     }
   }
 

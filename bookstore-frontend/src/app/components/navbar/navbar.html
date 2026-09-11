@@ -7,7 +7,6 @@
       <span class="brand-name">Bookstore</span>
     </a>
 
-
     <div class="search-box">
       <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9D9D9D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
@@ -21,9 +20,11 @@
         class="search-input"
       />
     </div>
+
     <div class="nav-actions">
+      <!-- User Profile Menu -->
       <div class="user-menu-wrapper">
-        <div class="nav-item user-item" (click)="toggleUserMenu()">
+        <div class="nav-item user-item" (click)="toggleUserMenu($event)">
           <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
@@ -31,34 +32,79 @@
           <span class="nav-label">{{ userDisplayName }}</span>
         </div>
 
-        <div class="user-dropdown" *ngIf="showDropdown && isLoggedIn">
-          <div class="dropdown-header">
-            <span class="greeting">Hello,</span>
-            <span class="user-fullname">{{ userDisplayName }}</span>
-          </div>
-          <div class="dropdown-divider"></div>
-          <button type="button" class="dropdown-item logout-btn" (click)="logout()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Logout
-          </button>
+        <div class="user-dropdown" *ngIf="showDropdown">
+          <!-- Unauthenticated View (Adobe XD Spec) -->
+          <ng-container *ngIf="!isLoggedIn">
+            <div class="dropdown-unauth-header">
+              <h4 class="welcome-title">Welcome</h4>
+              <p class="welcome-subtitle">To access account and manage orders</p>
+              <button type="button" class="btn-login-signup" (click)="goToLogin()">
+                LOGIN/SIGNUP
+              </button>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-menu-list">
+              <div class="dropdown-item" (click)="goToOrders()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                <span>My Orders</span>
+              </div>
+
+              <div class="dropdown-item" (click)="goToWishlist()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span>Wishlist</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Authenticated View -->
+          <ng-container *ngIf="isLoggedIn">
+            <div class="dropdown-header">
+              <span class="greeting-text">Hello {{ userDisplayName }},</span>
+            </div>
+
+            <div class="dropdown-menu-list">
+              <div class="dropdown-item" (click)="goToProfile()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Profile</span>
+              </div>
+
+              <div class="dropdown-item" (click)="goToOrders()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                <span>My Orders</span>
+              </div>
+
+              <div class="dropdown-item" (click)="goToWishlist()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span>Wishlist</span>
+              </div>
+            </div>
+
+            <div class="dropdown-footer">
+              <button type="button" class="logout-btn-outlined" (click)="logout()">
+                Logout
+              </button>
+            </div>
+          </ng-container>
         </div>
       </div>
 
-      <div class="nav-item wishlist-item" (click)="goToWishlist()">
-        <div class="wishlist-icon-wrapper">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-          </svg>
-          <span *ngIf="wishlistCount > 0" class="wishlist-badge">{{ wishlistCount }}</span>
-        </div>
-        <span class="nav-label">Wishlist</span>
-      </div>
-
-      <div class="nav-item cart-item">
+      <!-- Cart Item -->
+      <div class="nav-item cart-item" routerLink="/cart" style="cursor: pointer;">
         <div class="cart-icon-wrapper">
           <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="21" r="1"></circle>
@@ -72,4 +118,5 @@
     </div>
   </div>
 </header>
+
 

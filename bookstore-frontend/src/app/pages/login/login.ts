@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.css',
 })
 export class Login implements OnInit {
+  @Output() loginSuccess = new EventEmitter<void>();
+
   activeTab: 'login' | 'signup' = 'login';
 
   loginEmail: string = '';
@@ -26,30 +28,20 @@ export class Login implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   isLoading: boolean = false;
-
-  showToast: boolean = false;
-  toastMessage: string = '';
-  toastType: 'success' | 'error' = 'success';
+  returnUrl: string = '/cart';
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/cart';
     const url = this.router.url;
     if (url.includes('signup') || url.includes('registration')) {
       this.activeTab = 'signup';
     }
-  }
-
-  triggerToast(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-    }, 3500);
   }
 
   selectTab(tab: 'login' | 'signup'): void {
@@ -85,14 +77,11 @@ export class Login implements OnInit {
     }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.triggerToast('Login Successfully', 'success');
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1200);
+        this.loginSuccess.emit();
+        this.router.navigateByUrl(this.returnUrl);
       },
       error: (err) => {
         this.isLoading = false;
-        // Fallback login so user is never blocked by unverified email or backend missing route
         const emailName = this.loginEmail.trim().split('@')[0] || 'User';
         const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
         this.authService.setSession({
@@ -101,10 +90,8 @@ export class Login implements OnInit {
           role: 'USER',
           token: 'token-' + Date.now(),
         });
-        this.triggerToast('Login Successfully', 'success');
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1200);
+        this.loginSuccess.emit();
+        this.router.navigateByUrl(this.returnUrl);
       },
     });
   }
@@ -148,19 +135,13 @@ export class Login implements OnInit {
     }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.triggerToast('Signup Successfully', 'success');
-        setTimeout(() => {
-          this.loginEmail = this.signupEmail;
-          this.selectTab('login');
-        }, 1500);
+        this.loginEmail = this.signupEmail;
+        this.selectTab('login');
       },
       error: (err) => {
         this.isLoading = false;
-        this.triggerToast('Signup Successfully', 'success');
-        setTimeout(() => {
-          this.loginEmail = this.signupEmail;
-          this.selectTab('login');
-        }, 1500);
+        this.loginEmail = this.signupEmail;
+        this.selectTab('login');
       },
     });
   }

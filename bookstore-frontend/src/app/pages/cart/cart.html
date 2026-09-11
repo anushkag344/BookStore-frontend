@@ -1,0 +1,280 @@
+<div class="page-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumb-nav">
+        <a routerLink="/home" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">My cart</span>
+      </nav>
+
+      <!-- Cart Sections Container (When items exist) -->
+      <div class="cart-container" *ngIf="items.length > 0">
+
+        <!-- 1. MY CART CARD -->
+        <div class="cart-card" [class.collapsed]="step > 1">
+          <div class="card-header">
+            <h2 class="card-title">My cart ({{ totalCount }})</h2>
+            <!-- NOTE: Location dropdown removed as requested by user -->
+          </div>
+
+          <!-- Items List -->
+          <div class="items-list" *ngIf="step === 1 || step > 1">
+            <div class="cart-item" *ngFor="let item of items">
+              <div class="item-image-wrapper">
+                <img
+                  [src]="item.book.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c'"
+                  [alt]="item.book.bookName"
+                  class="item-image"
+                />
+              </div>
+
+              <div class="item-details">
+                <h3 class="book-title">{{ item.book.bookName }}</h3>
+                <p class="book-author">by {{ getAuthorName(item.book) }}</p>
+
+                <div class="price-row">
+                  <span class="price-current">
+                    Rs. {{ item.book.discountPrice && item.book.discountPrice > 0 ? item.book.discountPrice : item.book.price }}
+                  </span>
+                  <span
+                    class="price-original"
+                    *ngIf="item.book.discountPrice && item.book.discountPrice > 0 && item.book.discountPrice < item.book.price">
+                    Rs. {{ item.book.price }}
+                  </span>
+                </div>
+
+                <div class="item-controls" *ngIf="step === 1">
+                  <div class="quantity-stepper">
+                    <button type="button" class="btn-stepper" (click)="decreaseQuantity(item)">-</button>
+                    <span class="qty-count">{{ item.quantity }}</span>
+                    <button type="button" class="btn-stepper" (click)="increaseQuantity(item)">+</button>
+                  </div>
+                  <button type="button" class="btn-remove" (click)="removeItem(item.book.id)">Remove</button>
+                </div>
+
+                <div class="item-qty-summary" *ngIf="step > 1">
+                  <span class="qty-label">Qty: <b>{{ item.quantity }}</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Place Order Action -->
+          <div class="card-footer" *ngIf="step === 1">
+            <button type="button" class="btn-action btn-place-order" (click)="proceedToAddress()">
+              PLACE ORDER
+            </button>
+          </div>
+        </div>
+
+
+        <!-- 2. CUSTOMER DETAILS CARD -->
+        <div class="cart-card address-card" [class.disabled]="step < 2">
+          <div class="card-header">
+            <h2 class="card-title">Customer Details</h2>
+            <button
+              type="button"
+              class="btn-edit-header"
+              *ngIf="step === 3"
+              (click)="editAddress()">
+              Edit
+            </button>
+          </div>
+
+          <!-- Expanded Address Form (Step 2) -->
+          <div class="card-body" *ngIf="step === 2">
+            <form (submit)="proceedToSummary(); $event.preventDefault()">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="address.name"
+                    name="name"
+                    placeholder="Enter full name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mobile Number</label>
+                  <input
+                    type="tel"
+                    class="form-input"
+                    [(ngModel)]="address.phone"
+                    name="phone"
+                    placeholder="Enter mobile number"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Pincode</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="address.pincode"
+                    name="pincode"
+                    placeholder="Enter pincode"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Locality</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="address.locality"
+                    name="locality"
+                    placeholder="Enter locality"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">Address</label>
+                <textarea
+                  class="form-textarea"
+                  rows="3"
+                  [(ngModel)]="address.address"
+                  name="address"
+                  placeholder="Enter full address"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">City/Town</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="address.city"
+                    name="city"
+                    placeholder="Enter city"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">State</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="address.state"
+                    name="state"
+                    placeholder="Enter state"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">Type</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="type" [(ngModel)]="address.type" value="Home" />
+                    <span>Home</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="type" [(ngModel)]="address.type" value="Work" />
+                    <span>Work</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="type" [(ngModel)]="address.type" value="Other" />
+                    <span>Other</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <button type="submit" class="btn-action btn-continue">
+                  CONTINUE
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Saved Address Preview (Step 3) -->
+          <div class="address-preview" *ngIf="step === 3">
+            <p class="preview-name"><b>{{ address.name }}</b> &nbsp; {{ address.phone }}</p>
+            <p class="preview-text">{{ address.address }}, {{ address.locality }}, {{ address.city }}, {{ address.state }} - {{ address.pincode }} ({{ address.type }})</p>
+          </div>
+        </div>
+
+
+        <!-- 3. ORDER SUMMARY CARD -->
+        <div class="cart-card summary-card" [class.disabled]="step < 3">
+          <div class="card-header">
+            <h2 class="card-title">Order summary</h2>
+          </div>
+
+          <div class="card-body" *ngIf="step === 3">
+            <div class="summary-items">
+              <div class="summary-item" *ngFor="let item of items">
+                <img
+                  [src]="item.book.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c'"
+                  [alt]="item.book.bookName"
+                  class="summary-item-image"
+                />
+                <div class="summary-item-details">
+                  <h4 class="summary-book-title">{{ item.book.bookName }}</h4>
+                  <p class="summary-book-author">by {{ getAuthorName(item.book) }}</p>
+                  <div class="summary-price-row">
+                    <span class="price-current">
+                      Rs. {{ (item.book.discountPrice && item.book.discountPrice > 0 ? item.book.discountPrice : item.book.price) * item.quantity }}
+                    </span>
+                    <span class="item-qty-badge">Qty: {{ item.quantity }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-total-bar">
+              <span>Total Payable Amount:</span>
+              <span class="total-amount">Rs. {{ totalPrice }}</span>
+            </div>
+
+            <div class="card-footer">
+              <button type="button" class="btn-action btn-checkout" (click)="checkout()">
+                CHECKOUT
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- Empty Cart State -->
+      <div class="empty-cart-card" *ngIf="items.length === 0">
+        <div class="empty-icon-wrapper">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A03037" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <h3>Your Cart is Empty</h3>
+        <p>Looks like you haven't added any books to your cart yet.</p>
+        <a routerLink="/home" class="btn-continue-shopping">Explore Catalog</a>
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Login Modal Popup Overlay (Order Login - Adobe XD Design) -->
+  <div class="modal-backdrop" *ngIf="showLoginModal" (click)="closeLoginModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close-btn" (click)="closeLoginModal()">&times;</button>
+      <app-login (loginSuccess)="onLoginSuccessFromModal()"></app-login>
+    </div>
+  </div>
+</div>

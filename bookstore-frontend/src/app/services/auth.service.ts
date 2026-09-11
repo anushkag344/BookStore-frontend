@@ -52,8 +52,7 @@ export interface ResetPasswordDTO {
   providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/bookstore_user';
-  private relativeUrl = '/bookstore_user';
+  private apiPrefix = 'http://localhost:8080/bookstore_user';
   currentUser = signal<User | null>(this.getStoredUser());
 
   constructor(private http: HttpClient) {}
@@ -63,9 +62,13 @@ export class AuthService {
       return null;
     }
     const data = localStorage.getItem('currentUser');
-    if (data) {
+    const token = localStorage.getItem('authToken');
+    if (data && token) {
       try {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (parsed && (parsed.email || parsed.fullName)) {
+          return parsed;
+        }
       } catch (e) {
         return null;
       }
@@ -74,8 +77,7 @@ export class AuthService {
   }
 
   login(credentials: UserLoginDTO): Observable<LoginResponseDTO> {
-    return this.http.post<LoginResponseDTO>(`${this.baseUrl}/login`, credentials).pipe(
-      catchError(() => this.http.post<LoginResponseDTO>(`${this.relativeUrl}/login`, credentials)),
+    return this.http.post<LoginResponseDTO>(`${this.apiPrefix}/login`, credentials).pipe(
       tap((res) => {
         if (res && (res.token || res.email)) {
           const emailName = res.email ? res.email.split('@')[0] : credentials.email.split('@')[0];
@@ -93,17 +95,15 @@ export class AuthService {
   }
 
   register(data: UserRegistrationDTO): Observable<UserResponseDTO> {
-    return this.http.post<UserResponseDTO>(`${this.baseUrl}/registration`, data).pipe(
-      catchError(() => this.http.post<UserResponseDTO>(`${this.relativeUrl}/registration`, data))
-    );
+    return this.http.post<UserResponseDTO>(`${this.apiPrefix}/registration`, data);
   }
 
   forgotPassword(email: string): Observable<string> {
-    return this.http.post(`${this.baseUrl}/forgot-password`, { email }, { responseType: 'text' });
+    return this.http.post(`${this.apiPrefix}/forgot-password`, { email }, { responseType: 'text' });
   }
 
   resetPassword(token: string, newPassword: string): Observable<string> {
-    return this.http.post(`${this.baseUrl}/reset-password`, { token, newPassword }, { responseType: 'text' });
+    return this.http.post(`${this.apiPrefix}/reset-password`, { token, newPassword }, { responseType: 'text' });
   }
 
   setSession(user: User): void {
