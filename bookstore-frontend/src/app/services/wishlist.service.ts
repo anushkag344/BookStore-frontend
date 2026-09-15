@@ -3,28 +3,48 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Book } from './book.service';
 import { catchError, of } from 'rxjs';
 
+import { ToastService } from './toast.service';
+
 @Injectable({
   providedIn: 'root',
 })
 export class WishlistService {
-  private apiPrefix = 'http://localhost:8080/bookstore_user';
+  private apiPrefix = '/bookstore_user';
   private readonly STORAGE_KEY = 'bookstore_wishlist';
 
   wishlistItems = signal<Book[]>(this.loadFromStorage());
 
   totalCount = computed(() => this.wishlistItems().length);
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService
+  ) {
     this.fetchWishlistFromBackend();
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') || '' : '';
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'token': token,
-      'Authorization': token ? `Bearer ${token}` : ''
-    });
+  private hasValidToken(): boolean {
+    if (typeof window !== 'undefined' && localStorage) {
+      const t = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+      if (!t || t.trim().length === 0 || t.startsWith('mock-token')) {
+        return false;
+      }
+      try {
+        const parts = t.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.exp && Date.now() >= payload.exp * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('token');
+            return false;
+          }
+        }
+      } catch {
+        // continue
+      }
+      return true;
+    }
+    return false;
   }
 
   private loadFromStorage(): Book[] {
@@ -50,8 +70,12 @@ export class WishlistService {
   }
 
   fetchWishlistFromBackend(): void {
-    const headers = this.getHeaders();
-    this.http.get<any[]>(`${this.apiPrefix}/get_wishlist_items`, { headers }).pipe(
+    if (!this.hasValidToken()) {
+      return;
+    }
+    const endpoint = `${this.apiPrefix}/get_wishlist_items`;
+
+    this.http.get<any[]>(endpoint).pipe(
       catchError(() => of(null))
     ).subscribe((res) => {
       if (res && Array.isArray(res) && res.length > 0) {
@@ -82,10 +106,10 @@ export class WishlistService {
       const updated = [...current, book];
       this.wishlistItems.set(updated);
       this.saveToStorage(updated);
+      this.toastService.showSuccess('Book added to Wishlist successfully!');
 
-      const headers = this.getHeaders();
       const endpoint = `${this.apiPrefix}/add_wish_list/${book.id}`;
-      this.http.post(endpoint, {}, { headers }).pipe(
+      this.http.post(endpoint, {}).pipe(
         catchError(() => of(null))
       ).subscribe();
     }
@@ -95,11 +119,12 @@ export class WishlistService {
     const updated = this.wishlistItems().filter((item) => Number(item.id) !== Number(bookId));
     this.wishlistItems.set(updated);
     this.saveToStorage(updated);
+    this.toastService.showSuccess('Removed item from Wishlist!');
 
-    const headers = this.getHeaders();
     const endpoint = `${this.apiPrefix}/remove_wishlist_item/${bookId}`;
-    this.http.delete(endpoint, { headers }).pipe(
+    this.http.delete(endpoint).pipe(
       catchError(() => of(null))
     ).subscribe();
   }
 }
+

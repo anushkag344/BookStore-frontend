@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Book } from './book.service';
 import { catchError, of, Observable } from 'rxjs';
 
+import { ToastService } from './toast.service';
+
 export interface CartItem {
   id?: number;
   cartId?: number;
@@ -40,28 +42,35 @@ export class CartService {
     }, 0);
   });
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService
+  ) {
     this.fetchCartItemsFromBackend();
   }
 
-  private getToken(): string {
+  private hasValidToken(): boolean {
     if (typeof window !== 'undefined' && localStorage) {
-      return localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+      const t = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+      if (!t || t.trim().length === 0 || t.startsWith('mock-token')) {
+        return false;
+      }
+      try {
+        const parts = t.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.exp && Date.now() >= payload.exp * 1000) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('token');
+            return false;
+          }
+        }
+      } catch {
+        // continue
+      }
+      return true;
     }
-    return '';
-  }
-
-  private getHeaders(): HttpHeaders {
-    const token = this.getToken();
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
-    if (token) {
-      headers = headers
-        .set('token', token)
-        .set('Authorization', token.startsWith('Bearer ') ? token : `Bearer ${token}`);
-    }
-    return headers;
+    return false;
   }
 
   private loadFromLocalStorage(): CartItem[] {
@@ -88,10 +97,9 @@ export class CartService {
 
   // Fetch cart items from backend API
   fetchCartItemsFromBackend(): void {
-    const headers = this.getHeaders();
-    const url = `http://localhost:8080/bookstore_user/get_cart_items`;
+    const url = `/bookstore_user/get_cart_items`;
 
-    this.http.get<any>(url, { headers }).pipe(
+    this.http.get<any>(url).pipe(
       catchError(() => of(null))
     ).subscribe((res: any) => {
       if (res) {
@@ -120,44 +128,46 @@ export class CartService {
 
   // Add to cart with HTTP request to backend
   addToCart(book: Book): void {
-    // 1. Update local reactive state immediately
     const items = [...this.cartItems()];
     const existing = items.find((item) => item.book.id === book.id);
     if (existing) {
-      existing.quantity += 1;
-    } else {
-      items.push({ book, quantity: 1 });
+      this.updateQuantity(book.id, existing.quantity + 1);
+      this.toastService.showSuccess(`Updated quantity for "${book.bookName}"`);
+      return;
     }
+
+    items.push({ book, quantity: 1 });
     this.cartItems.set(items);
     this.saveToLocalStorage(items);
+    this.toastService.showSuccess('Book added to Bag successfully!');
 
-    // 2. Always fire HTTP request to add_cart_item API
-    const headers = this.getHeaders();
-    const url = `http://localhost:8080/bookstore_user/add_cart_item/${book.id}`;
-    this.http.post(url, {}, { headers }).pipe(
+    const url = `/bookstore_user/add_cart_item/${book.id}`;
+    this.http.post(url, {}).pipe(
       catchError(() => of(null))
-    ).subscribe();
+    ).subscribe(() => {
+      this.fetchCartItemsFromBackend();
+    });
   }
 
   // Update quantity with HTTP request to backend
   updateQuantity(bookId: number, qty: number): void {
+    if (qty <= 0) {
+      this.removeFromCart(bookId);
+      return;
+    }
+
     let items = [...this.cartItems()];
     const targetItem = items.find((item) => item.book.id === bookId || item.id === bookId || item.cartId === bookId);
     const cartId = targetItem?.cartId || targetItem?.id || bookId;
 
-    if (qty <= 0) {
-      items = items.filter((item) => item.book.id !== bookId);
-    } else {
-      if (targetItem) {
-        targetItem.quantity = qty;
-      }
+    if (targetItem) {
+      targetItem.quantity = qty;
     }
     this.cartItems.set(items);
     this.saveToLocalStorage(items);
 
-    const headers = this.getHeaders();
-    const url = `http://localhost:8080/bookstore_user/cart_item_quantity/${cartId}?quantity=${qty}`;
-    this.http.put(url, {}, { headers }).pipe(
+    const url = `/bookstore_user/cart_item_quantity/${cartId}?quantity=${qty}`;
+    this.http.put(url, {}).pipe(
       catchError(() => of(null))
     ).subscribe();
   }
@@ -172,9 +182,8 @@ export class CartService {
     this.cartItems.set(updated);
     this.saveToLocalStorage(updated);
 
-    const headers = this.getHeaders();
-    const url = `http://localhost:8080/bookstore_user/remove_cart_item/${cartId}`;
-    this.http.delete(url, { headers }).pipe(
+    const url = `/bookstore_user/remove_cart_item/${cartId}`;
+    this.http.delete(url).pipe(
       catchError(() => of(null))
     ).subscribe();
   }
@@ -182,23 +191,22 @@ export class CartService {
   // Place Order API Integration
   placeOrder(addressDetails: AddressDetails): Observable<any> {
     const currentItems = this.cartItems();
+    const orderItems = currentItems.map((item) => ({
+      product_id: String(item.book.id),
+      product_name: item.book.bookName,
+      product_quantity: item.quantity,
+      product_price: item.book.discountPrice && item.book.discountPrice > 0 ? item.book.discountPrice : item.book.price
+    }));
 
-    const cartIdList = currentItems.map((item) => item.cartId || item.id || item.book.id);
     const orderPayload = {
-      address: `${addressDetails.address}, ${addressDetails.locality || ''}, ${addressDetails.city}, ${addressDetails.state} - ${addressDetails.pincode}`,
-      addressDetails: addressDetails,
-      cartIdList: cartIdList,
-      totalAmount: this.totalPrice(),
-      items: currentItems
+      orders: orderItems
     };
 
-    // Clear cart locally on order place
-    this.cartItems.set([]);
-    this.saveToLocalStorage([]);
+    const url = `/bookstore_user/add/order`;
 
-    const headers = this.getHeaders();
-    const url = `http://localhost:8080/bookstore_user/add/order`;
-    return this.http.post(url, orderPayload, { headers }).pipe(
+    this.clearCart();
+
+    return this.http.post(url, orderPayload).pipe(
       catchError(() => of({ success: true, message: 'Order placed' }))
     );
   }
@@ -213,3 +221,4 @@ export class CartService {
     return item ? item.quantity : 0;
   }
 }
+

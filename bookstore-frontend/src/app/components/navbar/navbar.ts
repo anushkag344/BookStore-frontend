@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { BookService } from '../../services/book.service';
 import { CartService } from '../../services/cart.service';
 import { WishlistService } from '../../services/wishlist.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-navbar',
@@ -23,6 +24,7 @@ export class Navbar {
     public bookService: BookService,
     public cartService: CartService,
     public wishlistService: WishlistService,
+    private toastService: ToastService,
     private router: Router,
     private elementRef: ElementRef
   ) {}
@@ -73,9 +75,9 @@ export class Navbar {
   goToOrders(): void {
     this.showDropdown = false;
     if (!this.isLoggedIn) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/orders' } });
     } else {
-      this.router.navigate(['/cart']);
+      this.router.navigate(['/orders']);
     }
   }
 
@@ -87,7 +89,8 @@ export class Navbar {
   logout() {
     this.showDropdown = false;
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.toastService.showSuccess('Logged out successfully!');
+    this.router.navigate(['/home']);
   }
 }
 

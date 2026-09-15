@@ -8,6 +8,7 @@ import { Wishlist } from './pages/wishlist/wishlist';
 import { Cart } from './pages/cart/cart';
 import { OrderPlaced } from './pages/order-placed/order-placed';
 import { BookDetails } from './pages/book-details/book-details';
+import { MyOrders } from './pages/my-orders/my-orders';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -19,6 +20,8 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPassword },
   { path: 'wishlist', component: Wishlist },
   { path: 'cart', component: Cart },
+  { path: 'orders', component: MyOrders },
+  { path: 'my-orders', component: MyOrders },
   { path: 'order-placed', component: OrderPlaced },
   { path: 'book-details/:id', component: BookDetails },
   { path: 'book_details/:id', component: BookDetails },

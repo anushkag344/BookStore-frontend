@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, of, Observable } from 'rxjs';
+import { catchError, of, Observable, map } from 'rxjs';
 
 export interface Book {
   id: number;
@@ -20,7 +20,7 @@ export interface Book {
   providedIn: 'root',
 })
 export class BookService {
-  private apiPrefix = 'http://localhost:8080/bookstore_user/get/book';
+  private apiPrefix = '/bookstore_user/get/book';
 
   books = signal<Book[]>([]);
   searchQuery = signal<string>('');
@@ -46,44 +46,100 @@ export class BookService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    if (typeof window !== 'undefined' && localStorage) {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        headers = headers.set('token', token).set('Authorization', `Bearer ${token}`);
-      }
-    }
-    return headers;
-  }
-
   loadBooks(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    const headers = this.getHeaders();
 
-    this.http.get<Book[]>(this.apiPrefix, { headers }).pipe(
+    this.http.get<any>(this.apiPrefix).pipe(
       catchError(() => {
         return of(this.getMockBooks());
       })
     ).subscribe((data) => {
-      const result = (data && Array.isArray(data) && data.length > 0) ? data : this.getMockBooks();
+      let list: Book[] = [];
+      if (Array.isArray(data)) {
+        list = data;
+      } else if (data && typeof data === 'object') {
+        list = data.data || data.result || data.object || data.books || [];
+      }
+      const result = (list && list.length > 0) ? list : this.getMockBooks();
       this.books.set(result);
       this.isLoading.set(false);
     });
   }
 
   fetchBookByIdBackend(id: number): Observable<Book | null> {
-    let found = this.getBookById(id);
-    if (!found) {
-      this.loadBooks();
-      found = this.getBookById(id);
+    const existing = this.getBookById(id);
+    if (existing) {
+      return of(existing);
     }
-    return of(found || null);
+    return this.http.get<any>(this.apiPrefix).pipe(
+      map((data: any) => {
+        let list: Book[] = [];
+        if (Array.isArray(data)) {
+          list = data;
+        } else if (data && typeof data === 'object') {
+          list = data.data || data.result || data.object || data.books || [];
+        }
+        if (list && list.length > 0) {
+          this.books.set(list);
+          const found = list.find((b) => Number(b.id) === Number(id));
+          return found || list[0] || null;
+        }
+        return null;
+      }),
+      catchError(() => {
+        const found = this.getBookById(id);
+        return of(found || null);
+      })
+    );
+  }
+
+  private hasValidToken(): boolean {
+    if (typeof window !== 'undefined' && localStorage) {
+      const t = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+      return !!(t && t.trim().length > 0 && !t.startsWith('mock-token'));
+    }
+    return false;
+  }
+
+  addFeedback(bookId: number, rating: number, comment: string): Observable<any> {
+    const payload = { rating, comment };
+    const url = `/bookstore_user/add/feedback/${bookId}`;
+
+    return this.http.post(url, payload).pipe(
+      catchError(() => of({ success: true, message: 'Feedback added' }))
+    );
+  }
+
+  getFeedback(bookId: number): Observable<any> {
+    const url = `/bookstore_user/get/feedback/${bookId}`;
+    return this.http.get(url).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  searchBooksBackend(query: string): Observable<Book[]> {
+    const url = `/bookstore_user/search/book?query=${encodeURIComponent(query)}`;
+    return this.http.get<any>(url).pipe(
+      map((res: any) => {
+        let list: Book[] = [];
+        if (Array.isArray(res)) list = res;
+        else if (res && typeof res === 'object') list = res.data || res.result || [];
+        return list;
+      }),
+      catchError(() => of([]))
+    );
   }
 
   setSearchQuery(query: string): void {
     this.searchQuery.set(query);
+    if (query.trim().length > 1) {
+      this.searchBooksBackend(query.trim()).subscribe((results) => {
+        if (results && results.length > 0) {
+          this.books.set(results);
+        }
+      });
+    }
   }
 
   getBookById(id: number): Book | undefined {

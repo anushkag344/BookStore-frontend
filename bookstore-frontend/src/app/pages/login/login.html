@@ -41,7 +41,7 @@
             [(ngModel)]="loginEmail"
             class="form-control"
             placeholder="example@gmail.com"
-            autocomplete="off"
+            autocomplete="new-password"
             required
           />
         </div>
@@ -55,6 +55,7 @@
               name="loginPassword"
               [(ngModel)]="loginPassword"
               class="form-control"
+              autocomplete="new-password"
               required
             />
             <button
@@ -85,16 +86,6 @@
           <span *ngIf="!isLoading">Login</span>
           <span *ngIf="isLoading">Logging in...</span>
         </button>
-
-        <div class="or-divider">
-          <span class="or-line"></span>
-          <span class="or-text">OR</span>
-          <span class="or-line"></span>
-        </div>
-
-        <div class="social-buttons">
-          <button type="button" class="btn-social btn-google">Google</button>
-        </div>
       </form>
 
       <!-- Signup Form -->

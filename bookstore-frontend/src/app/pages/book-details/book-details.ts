@@ -8,6 +8,8 @@ import { Book, BookService } from '../../services/book.service';
 import { CartService } from '../../services/cart.service';
 import { WishlistService } from '../../services/wishlist.service';
 
+import { ToastService } from '../../services/toast.service';
+
 interface Review {
   name: string;
   avatar: string;
@@ -39,7 +41,8 @@ export class BookDetails implements OnInit {
     private router: Router,
     public bookService: BookService,
     public cartService: CartService,
-    public wishlistService: WishlistService
+    public wishlistService: WishlistService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -48,52 +51,61 @@ export class BookDetails implements OnInit {
       this.bookId = Number(idParam);
     }
 
-    if (this.bookService.books().length === 0) {
-      this.bookService.loadBooks();
-    }
-
     this.loadBookData();
+    this.loadFeedback();
+  }
+
+  loadFeedback(): void {
+    if (!this.bookId) return;
+    this.bookService.getFeedback(this.bookId).subscribe((res) => {
+      if (res) {
+        const list = Array.isArray(res) ? res : (res.data || res.result || res.feedbackList || []);
+        if (Array.isArray(list) && list.length > 0) {
+          const fetchedReviews: Review[] = list.map((item: any) => ({
+            name: item.userName || item.name || item.user?.firstName || 'User',
+            avatar: (item.userName || item.name || 'U').charAt(0).toUpperCase(),
+            rating: item.rating || 5,
+            comment: item.comment || item.feedback || '',
+            date: item.date || 'Recent'
+          }));
+          this.reviews = fetchedReviews;
+        }
+      }
+    });
   }
 
   loadBookData(): void {
-    if (this.bookId) {
-      this.bookService.fetchBookByIdBackend(this.bookId).subscribe((b) => {
-        if (b) {
-          this.book = b;
-          this.setupImages(b);
-        }
-      });
-    }
+    if (!this.bookId) return;
 
-    const found = this.bookService.getBookById(this.bookId);
-    if (found) {
-      this.book = found;
-      this.setupImages(found);
-    } else {
-      setTimeout(() => {
-        const retryFound = this.bookService.getBookById(this.bookId);
-        if (retryFound) {
-          this.book = retryFound;
-          this.setupImages(retryFound);
+    // Call backend API so request is visible in Inspect Network tab
+    this.bookService.fetchBookByIdBackend(this.bookId).subscribe((b) => {
+      if (b) {
+        this.book = b;
+        this.setupImages(b);
+      } else {
+        const localFound = this.bookService.getBookById(this.bookId);
+        if (localFound) {
+          this.book = localFound;
+          this.setupImages(localFound);
         } else {
           const firstBook = this.bookService.books()[0];
           this.book = firstBook || {
-            id: this.bookId || 1,
-            bookName: "Think Positive",
+            id: this.bookId || 12,
+            bookName: 'Think Positive',
             author: 'James Thomas',
             authorName: 'James Thomas',
-            description: 'A inspiring book on positive thinking and mindset by James Thomas.',
+            description: 'The famous book with amazing content',
             price: 1000,
             discountPrice: 600,
             quantity: 20,
-            image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c',
+            image: 'book-shopping.png',
             rating: 4.5,
             ratingCount: 10,
           };
           this.setupImages(this.book);
         }
-      }, 300);
-    }
+      }
+    });
   }
 
   setupImages(b: Book): void {
@@ -161,16 +173,30 @@ export class BookDetails implements OnInit {
   submitReview(): void {
     if (!this.reviewText.trim()) return;
 
+    const rating = this.userRating || 5;
+    const comment = this.reviewText.trim();
+    const targetBookId = this.bookId || (this.book ? this.book.id : 1);
+
     const newReview: Review = {
       name: 'User',
       avatar: 'U',
-      rating: this.userRating || 5,
-      comment: this.reviewText.trim(),
+      rating: rating,
+      comment: comment,
       date: 'Just now',
     };
 
     this.reviews.unshift(newReview);
     this.reviewText = '';
     this.userRating = 0;
+    this.toastService.showSuccess('Feedback submitted successfully!');
+
+    this.bookService.addFeedback(targetBookId, rating, comment).subscribe();
+  }
+
+  onImgError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'book-shopping.png';
+    }
   }
 }

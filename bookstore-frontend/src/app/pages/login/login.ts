@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
+
+import { CartService } from '../../services/cart.service';
+import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +20,8 @@ export class Login implements OnInit {
 
   activeTab: 'login' | 'signup' = 'login';
 
-  loginEmail: string = '';
-  loginPassword: string = '';
+  loginEmail: string = 'user@gmail.com';
+  loginPassword: string = 'Password@123';
 
   signupFullName: string = '';
   signupEmail: string = '';
@@ -28,16 +32,19 @@ export class Login implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   isLoading: boolean = false;
-  returnUrl: string = '/cart';
+  returnUrl: string = '/home';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService,
+    private cartService: CartService,
+    private wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/cart';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
     const url = this.router.url;
     if (url.includes('signup') || url.includes('registration')) {
       this.activeTab = 'signup';
@@ -71,27 +78,31 @@ export class Login implements OnInit {
 
     this.isLoading = true;
 
+    const handleSuccess = () => {
+      this.isLoading = false;
+      this.toastService.showSuccess('Login Successful!');
+      this.loginSuccess.emit();
+      // Only navigate if standalone /login route, NOT inside a modal
+      if (!this.loginSuccess.observed && this.router.url.includes('login')) {
+        this.router.navigateByUrl(this.returnUrl);
+      }
+    };
+
     this.authService.login({
       email: this.loginEmail.trim(),
       password: this.loginPassword,
     }).subscribe({
       next: (res) => {
-        this.isLoading = false;
-        this.loginSuccess.emit();
-        this.router.navigateByUrl(this.returnUrl);
+        // Immediately load user's real cart and wishlist from backend
+        this.cartService.fetchCartItemsFromBackend();
+        this.wishlistService.fetchWishlistFromBackend();
+        handleSuccess();
       },
       error: (err) => {
         this.isLoading = false;
-        const emailName = this.loginEmail.trim().split('@')[0] || 'User';
-        const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-        this.authService.setSession({
-          fullName: displayName,
-          email: this.loginEmail.trim(),
-          role: 'USER',
-          token: 'token-' + Date.now(),
-        });
-        this.loginSuccess.emit();
-        this.router.navigateByUrl(this.returnUrl);
+        const errMsg = err?.error?.message || (typeof err?.error === 'string' ? err.error : null) || 'Invalid email or password';
+        this.errorMessage = errMsg;
+        this.toastService.showError(errMsg);
       },
     });
   }
@@ -133,16 +144,26 @@ export class Login implements OnInit {
       password: this.signupPassword,
       mobileNumber: this.signupMobile.trim(),
     }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading = false;
+        const msg = (res && typeof res === 'string') ? res : (res?.message || 'Registration Successful! Please login.');
+        this.toastService.showSuccess(msg);
         this.loginEmail = this.signupEmail;
         this.selectTab('login');
       },
       error: (err) => {
         this.isLoading = false;
-        this.loginEmail = this.signupEmail;
-        this.selectTab('login');
+        const errMsg = err?.error?.message || (typeof err?.error === 'string' ? err.error : null);
+        if (errMsg) {
+          this.errorMessage = errMsg;
+          this.toastService.showError(errMsg);
+        } else {
+          this.toastService.showSuccess('Registration Successful! Please login.');
+          this.loginEmail = this.signupEmail;
+          this.selectTab('login');
+        }
       },
     });
   }
+
 }

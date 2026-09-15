@@ -29,9 +29,10 @@
 
           <div class="book-image-wrapper">
             <img
-              [src]="book.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c'"
+              [src]="book.image || 'book-shopping.png'"
               [alt]="book.bookName"
               class="book-image"
+              (error)="onImgError($event)"
             />
           </div>
 

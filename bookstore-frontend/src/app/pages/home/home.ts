@@ -55,4 +55,11 @@ export class Home implements OnInit {
   openBookDetails(id: number): void {
     this.router.navigate(['/book-details', id]);
   }
+
+  onImgError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'book-shopping.png';
+    }
+  }
 }

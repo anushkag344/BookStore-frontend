@@ -1,0 +1,102 @@
+<div class="page-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumb-nav">
+        <a routerLink="/home" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">My orders</span>
+      </nav>
+
+      <div class="orders-header">
+        <h1 class="orders-title">My Orders</h1>
+        <span class="orders-count" *ngIf="orders.length > 0">({{ orders.length }} {{ orders.length === 1 ? 'order' : 'orders' }})</span>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-spinner-container" *ngIf="isLoading && orders.length === 0">
+        <div class="spinner"></div>
+        <p>Loading your orders...</p>
+      </div>
+
+      <!-- Orders List -->
+      <div class="orders-list" *ngIf="orders.length > 0">
+        <div class="order-card" *ngFor="let order of orders">
+          <div class="order-card-header">
+            <div class="order-id-group">
+              <span class="order-id-label">Order ID:</span>
+              <span class="order-id-value">#{{ order.orderId }}</span>
+            </div>
+            <div class="order-meta-group">
+              <span class="order-date" *ngIf="order.orderDate">{{ order.orderDate }}</span>
+              <span class="status-badge">
+                <span class="status-dot"></span>
+                {{ order.status || 'Order Placed' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="order-card-body">
+            <div class="order-items-list">
+              <div class="order-item" *ngFor="let item of order.items">
+                <div class="item-image-wrapper">
+                  <img
+                    [src]="item.image || 'book-shopping.png'"
+                    [alt]="item.bookName"
+                    class="item-image"
+                    (error)="onImgError($event)"
+                  />
+                </div>
+                <div class="item-details">
+                  <h3 class="item-name">{{ item.bookName }}</h3>
+                  <p class="item-author">by {{ item.author }}</p>
+                  <div class="item-price-qty">
+                    <span class="item-price">Rs. {{ item.price }}</span>
+                    <span class="item-qty">Qty: {{ item.quantity }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-address-box" *ngIf="order.address">
+              <div class="address-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A03037" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Delivery Address</span>
+              </div>
+              <p class="address-text">{{ order.address }}</p>
+            </div>
+          </div>
+
+          <div class="order-card-footer">
+            <div class="total-price-group">
+              <span class="total-label">Total Amount:</span>
+              <span class="total-value">Rs. {{ order.totalPrice }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-orders-card" *ngIf="!isLoading && orders.length === 0">
+        <div class="empty-icon-wrapper">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A03037" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <h3>No Orders Placed Yet</h3>
+        <p>Looks like you haven't ordered any books yet. Start exploring our collection!</p>
+        <a routerLink="/home" class="btn-continue-shopping">Explore Catalog</a>
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>
